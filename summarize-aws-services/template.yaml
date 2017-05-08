@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Outputs:
+
+  SummarizeFunction:
+    Description: "Summarize AWS services Lambda Function ARN"
+    Value: !GetAtt OpsidianSummarizeAWSServices.Arn
+
+Resources:
+
+  OpsidianSummarizeIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/ReadOnlyAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+
+  OpsidianSummarizeAWSServices:
+
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: summarize.lambda_handler
+      Runtime: python2.7
+      Description: "Summarize AWS services in one lambda function for Opsidian user lambda functionality."
+      MemorySize: 1536
+      Timeout: 60
+      Role: !GetAtt OpsidianSummarizeIAMRole.Arn
